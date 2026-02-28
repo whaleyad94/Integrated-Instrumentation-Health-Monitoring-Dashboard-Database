@@ -5,7 +5,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 -->
 <dbmodel pgmodeler-ver="1.2.3" use-changelog="false" max-obj-count="4"
 	 gen-disabled-objs-code="false" show-sys-schemas-rects="true"
-	 last-position="201,62" last-zoom="1"
+	 last-position="504,171" last-zoom="1"
 	 default-schema="public" default-owner="postgres"
 	 layers="Default layer"
 	 active-layers="0"
@@ -22,11 +22,11 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<role name="postgres"/>
 </schema>
 
-<table name="instrument_types" layers="0" collapse-mode="2" max-obj-count="2" z-value="0">
+<table name="instrument_types" layers="0" collapse-mode="2" max-obj-count="20" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
 	<comment> <![CDATA[Before we define the columns for the 'instruments' table, we need to clarify an important distinction. The instruments table holds individual physical devices — the specific RTD with serial number TE-0412A installed on Hot Leg Loop 1. What makes it comprehensive isn't the table structure itself, but the instrument types that populate it. The instrument types table is the catalog of all sensing technologies used in the plant, and every individual instrument references a type.]]> </comment>
-	<position x="541" y="326"/>
+	<position x="340" y="20"/>
 	<column name="type_id" not-null="true"
 	 identity-type="ALWAYS">
 		<type name="integer" length="0"/>
@@ -38,9 +38,196 @@ CAUTION: Do not modify this file unless you know what you are doing.
 
 For Data Type, we choose VarThen because Variable-length with a maximum. Stores only the characters you actually provide, up to the limit. "RTD" stores as just "RTD" using only 3 characters. The length limit acts as a data integrity guard — it prevents someone from accidentally inserting a 500-character string into a field that should hold a short code. That's why it's appropriate for type_code — you know codes should be short, so capping it at 20 characters enforces that expectation at the database level. Then in the L (length) field next to it, we enter 20. This gives us up to 20 characters, which is plenty for short codes like "RTD", "SPND", "LPMS_ACCEL" while preventing someone from accidentally storing a full sentence in a code field.]]> </comment>
 	</column>
+	<column name="type_name">
+		<type name="varchar" length="100"/>
+		<comment> <![CDATA[The full descriptive name. "Resistance Temperature Detector", "Capacitance Pressure Transmitter", "Self-Powered Neutron Detector". This is what displays on dashboards and reports.]]> </comment>
+	</column>
+	<column name="sensing_principle">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[A text description of how the instrument physically makes its measurement. For an RTD: "Electrical resistance of platinum element changes predictably with temperature." For a capacitance pressure transmitter: "Diaphragm deflection under pressure changes capacitance between sensing element and fixed plate." This is valuable for training, troubleshooting, and understanding why certain failure modes occur.]]> </comment>
+	</column>
+	<column name="typical_accuracy">
+		<type name="varchar" length="50"/>
+		<comment> <![CDATA[The nominal accuracy specification for this type of instrument. For example, "±0.1-0.5°C" for RTDs, "±0.25% of span" for capacitance pressure transmitters. Stored as text rather than a numeric value because accuracy specifications have different formats and qualifying conditions across instrument types]]> </comment>
+	</column>
+	<column name="typical_range_min">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[Lower bound of the general operating range for this sensing technology. Represents the technology's capability, not any individual instrument's calibrated range.]]> </comment>
+	</column>
+	<column name="typical_range_max">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[Upper bound of the general operating range for this sensing technology. Represents the technology's capability, not any individual instrument's calibrated range]]> </comment>
+	</column>
+	<column name="range_unit">
+		<type name="varchar" length="20"/>
+		<comment> <![CDATA[The engineering unit for the typical range values. °C, MPa, neutrons/cm²·s, etc. This could alternatively be pulled from the measurement_parameters table if you want to enforce consistency at that level, but having it here allows for cases where different instrument types under the same parameter might use different practical units.]]> </comment>
+	</column>
+	<column name="output_signal">
+		<type name="varchar" length="50"/>
+		<comment> <![CDATA[What electrical signal the instrument produces. Common values: "4-20 mA", "0-10 VDC", "pulse/frequency", "thermocouple mV", "resistance (ohms)", "digital/fieldbus", "self-generating (no power required)", "contact closure". This is important because it determines what signal conditioning, wiring, and input cards are needed]]> </comment>
+	</column>
+	<column name="power_requirements">
+		<type name="varchar" length="50"/>
+		<comment> <![CDATA[What the instrument needs to operate. "24 VDC loop powered", "120 VAC", "self-powered", "none (passive)". Important for understanding failure modes — a loss of power affects loop-powered transmitters differently than self-powered sensors.]]> </comment>
+	</column>
+	<column name="environmental_qualification">
+		<type name="varchar" length="50"/>
+		<comment> <![CDATA[Whether this instrument type is generally available in environmentally qualified (EQ) versions suitable for harsh environments (inside containment during design basis accidents). This could be a boolean (EQ available: yes/no) or a text field describing the qualifying conditions. EQ is a major regulatory requirement under 10CFR50.49, and knowing which instrument types can be qualified affects design decisions.]]> </comment>
+	</column>
+	<column name="radiation_tolerance">
+		<type name="varchar" length="100"/>
+		<comment> <![CDATA[General radiation tolerance of the sensing technology. Some instruments (like fiber optic sensors) are inherently radiation-tolerant, while others (like certain semiconductor devices) have limited total dose capability. Stored as text describing the general capability rather than a hard number, since tolerance depends on specific models and conditions]]> </comment>
+	</column>
+	<column name="typical_lifespan_years">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[The expected service life under normal conditions. RTDs might be 20-40 years, rhodium SPNDs might be 3-5 years due to emitter burnup. Helps with lifecycle planning and replacement forecasting.]]> </comment>
+	</column>
+	<column name="maintenance_considerations">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Text field describing general maintenance and calibration characteristics for this type. For example, RTDs: "Subject to RTDR (resistance vs. temperature) drift; calibration verified by cross-comparison or removal and bench calibration." For orifice plates: "No moving parts; primary degradation is plate erosion affecting discharge coefficient." This field supports maintenance planning and troubleshooting]]> </comment>
+	</column>
+	<column name="is_active" not-null="true" default-value="TRUE">
+		<type name="boolean" length="0"/>
+		<comment> <![CDATA[Boolean flag indicating whether this instrument type is currently in active use at the plant. Older technologies (like BF-3 proportional counters) may be retained in the database for historical records but flagged as inactive]]> </comment>
+	</column>
+	<column name="description">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[A longer text field for any additional information about the instrument type that doesn't fit neatly into the structured fields. Technical notes, historical context, applicable IEEE or ISA standards, or references to vendor technical manuals.]]> </comment>
+	</column>
 	<constraint name="uq_instrument_types_type_code" type="uq-constr" table="public.instrument_types">
 		<columns names="type_code" ref-type="src-columns"/>
 		<comment> <![CDATA[We give this constraint a descriptive name like uq_instrument_types_type_code. The naming convention uq_tablename_columnname is a common professional practice that makes it immediately clear what the constraint does.]]> </comment>
+	</constraint>
+	<constraint name="instrument_types_pk" type="pk-constr" table="public.instrument_types">
+		<columns names="type_id" ref-type="src-columns"/>
+	</constraint>
+	<constraint name="uq_instrument_types_type_name" type="uq-constr" table="public.instrument_types">
+		<columns names="type_name" ref-type="src-columns"/>
+	</constraint>
+
+	<customidxs object-type="column">
+		<object name="parameter_id_measurement_parameters" index="16"/>
+	</customidxs>
+	<customidxs object-type="constraint">
+		<object name="measurement_parameters_fk" index="3"/>
+	</customidxs></table>
+
+<table name="measurement_parameters" layers="0" collapse-mode="2" max-obj-count="6" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="820" y="40"/>
+	<column name="parameter_id" not-null="true"
+	 identity-type="ALWAYS">
+		<type name="integer" length="0"/>
+		<comment> <![CDATA[Primary key. Auto-incrementing integer identifier for each measurement parameter.]]> </comment>
+	</column>
+	<column name="parameter_code" not-null="true">
+		<type name="varchar" length="10"/>
+		<comment> <![CDATA[Short standardized code for the measurement parameter (e.g., TEMP, PRES, FLOW, NFLUX). Used for filtering and quick reference]]> </comment>
+	</column>
+	<column name="parameter_name" not-null="true">
+		<type name="varchar" length="50"/>
+		<comment> <![CDATA[Full descriptive name of the measurement parameter (e.g., Temperature, Pressure, Neutron Flux, Seismic Acceleration).]]> </comment>
+	</column>
+	<column name="si_unit" not-null="true">
+		<type name="varchar" length="30"/>
+		<comment> <![CDATA[SI or standard engineering unit for this measurement parameter (e.g., °C, Pa, m³/s, neutrons/cm²·s).]]> </comment>
+	</column>
+	<column name="description">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Detailed description of the measurement parameter including its significance in nuclear plant operations, typical applications, and regulatory relevance]]> </comment>
+	</column>
+	<constraint name="measurement_parameters_pk" type="pk-constr" table="public.measurement_parameters">
+		<columns names="parameter_id" ref-type="src-columns"/>
+	</constraint>
+	<constraint name="uq_measurement_parameters_parameter_code" type="uq-constr" table="public.measurement_parameters">
+		<columns names="parameter_code" ref-type="src-columns"/>
+	</constraint>
+	<constraint name="uq_measurement_parameters_parameter_name" type="uq-constr" table="public.measurement_parameters">
+		<columns names="parameter_name" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<relationship name="measurement_parameters_has_many_instrument_types" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
+	 custom-color="#48a076"
+	 src-table="public.measurement_parameters"
+	 dst-table="public.instrument_types"
+	 src-required="false" dst-required="false"/>
+
+<table name="plant_systems" layers="0" collapse-mode="2" max-obj-count="6" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="811" y="374"/>
+	<column name="system_id" not-null="true"
+	 identity-type="ALWAYS">
+		<type name="integer" length="0"/>
+		<comment> <![CDATA[Primary key. Auto-incrementing integer identifier for each plant system.]]> </comment>
+	</column>
+	<column name="system_code" not-null="true">
+		<type name="varchar" length="10"/>
+		<comment> <![CDATA[Standard system identifier code (e.g., RCS, CVCS, MSS, ECCS). Used in plant documentation, P&IDs, and work orders.]]> </comment>
+	</column>
+	<column name="system_name" not-null="true">
+		<type name="varchar" length="100"/>
+		<comment> <![CDATA[Full descriptive name of the plant system (e.g., Reactor Coolant System, Chemical and Volume Control System)]]> </comment>
+	</column>
+	<column name="description">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Description of the plant system including its function, major components, and role in plant operations and safety]]> </comment>
+	</column>
+	<column name="is_safety_related" not-null="true" default-value="FALSE">
+		<type name="boolean" length="0"/>
+		<comment> <![CDATA[Whether the system is classified as safety-related per 10CFR50. Determines quality assurance requirements and regulatory oversight applicable to the system and its instruments.]]> </comment>
+	</column>
+	<constraint name="plant_systems_pk" type="pk-constr" table="public.plant_systems">
+		<columns names="system_id" ref-type="src-columns"/>
+	</constraint>
+	<constraint name="uq_plant_systems_system_code" type="uq-constr" table="public.plant_systems">
+		<columns names="system_code" ref-type="src-columns"/>
+	</constraint>
+	<constraint name="uq_plant_systems_system_name" type="uq-constr" table="public.plant_systems">
+		<columns names="system_name" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="locations" layers="0" collapse-mode="2" max-obj-count="7" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="1220" y="380"/>
+	<column name="location_id" not-null="true"
+	 identity-type="ALWAYS">
+		<type name="integer" length="0"/>
+		<comment> <![CDATA[Primary key. Auto-incrementing integer identifier for each location.]]> </comment>
+	</column>
+	<column name="location_code" not-null="true">
+		<type name="varchar" length="20"/>
+		<comment> <![CDATA[Short location identifier code (e.g., CTMT for containment, AUX-2 for auxiliary building second floor). Used in plant documentation and work orders.]]> </comment>
+	</column>
+	<column name="location_name" not-null="true">
+		<type name="varchar" length="100"/>
+		<comment> <![CDATA[Full descriptive name of the location (e.g., Containment Building, Auxiliary Building Second Floor)]]> </comment>
+	</column>
+	<column name="location_type" not-null="true">
+		<type name="varchar" length="20"/>
+		<comment> <![CDATA[Level in the location hierarchy (e.g., Building, Floor, Room, Area, Equipment). Supports hierarchical filtering and navigation.]]> </comment>
+	</column>
+	<column name="parent_location_id">
+		<type name="integer" length="0"/>
+		<comment> <![CDATA[Self-referencing foreign key to the parent location. Creates a hierarchy (e.g., Room → Floor → Building). Null for top-level locations.]]> </comment>
+	</column>
+	<column name="description">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Additional details about the location including environmental conditions, access requirements, or radiological zone classification]]> </comment>
+	</column>
+	<constraint name="locations_pk" type="pk-constr" table="public.locations">
+		<columns names="location_id" ref-type="src-columns"/>
+	</constraint>
+	<constraint name="uq_locations_location_code" type="uq-constr" table="public.locations">
+		<columns names="location_code" ref-type="src-columns"/>
 	</constraint>
 </table>
 
