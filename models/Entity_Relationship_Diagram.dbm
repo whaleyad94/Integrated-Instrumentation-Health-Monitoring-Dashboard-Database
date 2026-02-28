@@ -3,9 +3,9 @@
 CAUTION: Do not modify this file unless you know what you are doing.
  Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="1.2.3" use-changelog="false" max-obj-count="8"
+<dbmodel pgmodeler-ver="1.2.3" use-changelog="false" max-obj-count="13"
 	 gen-disabled-objs-code="false" show-sys-schemas-rects="true"
-	 last-position="131,81" last-zoom="1" scene-rect="0,-20,1802.44,1172.72"
+	 last-position="0,-98" last-zoom="0.35" scene-rect="-157,-1096.8,2136.98,2677.64"
 	 default-schema="public" default-owner="postgres"
 	 layers="Default layer"
 	 active-layers="0"
@@ -26,7 +26,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<schema name="public"/>
 	<role name="postgres"/>
 	<comment> <![CDATA[Before we define the columns for the 'instruments' table, we need to clarify an important distinction. The instruments table holds individual physical devices — the specific RTD with serial number TE-0412A installed on Hot Leg Loop 1. What makes it comprehensive isn't the table structure itself, but the instrument types that populate it. The instrument types table is the catalog of all sensing technologies used in the plant, and every individual instrument references a type.]]> </comment>
-	<position x="340" y="20"/>
+	<position x="53.4444" y="303.667"/>
 	<column name="type_id" not-null="true"
 	 identity-type="ALWAYS">
 		<type name="integer" length="0"/>
@@ -115,7 +115,7 @@ For Data Type, we choose VarThen because Variable-length with a maximum. Stores 
 <table name="measurement_parameters" layers="0" collapse-mode="2" max-obj-count="6" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="960" y="20"/>
+	<position x="41.2222" y="-7.88889"/>
 	<column name="parameter_id" not-null="true"
 	 identity-type="ALWAYS">
 		<type name="integer" length="0"/>
@@ -161,7 +161,7 @@ For Data Type, we choose VarThen because Variable-length with a maximum. Stores 
 <table name="plant_systems" layers="0" collapse-mode="2" max-obj-count="6" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="340" y="560"/>
+	<position x="658.778" y="-137.556"/>
 	<column name="system_id" not-null="true"
 	 identity-type="ALWAYS">
 		<type name="integer" length="0"/>
@@ -197,7 +197,7 @@ For Data Type, we choose VarThen because Variable-length with a maximum. Stores 
 <table name="locations" layers="0" collapse-mode="2" max-obj-count="7" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="960" y="540"/>
+	<position x="1014.22" y="954.556"/>
 	<column name="location_id" not-null="true"
 	 identity-type="ALWAYS">
 		<type name="integer" length="0"/>
@@ -234,7 +234,7 @@ For Data Type, we choose VarThen because Variable-length with a maximum. Stores 
 <table name="safety_classifications" layers="0" collapse-mode="2" max-obj-count="7" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="960" y="260"/>
+	<position x="1180.89" y="408.111"/>
 	<column name="classification_id" not-null="true"
 	 identity-type="ALWAYS">
 		<type name="integer" length="0"/>
@@ -274,7 +274,7 @@ For Data Type, we choose VarThen because Variable-length with a maximum. Stores 
 <table name="instrument_statuses" layers="0" collapse-mode="2" max-obj-count="6" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="340" y="820"/>
+	<position x="299.921" y="950.952"/>
 	<column name="status_id" not-null="true"
 	 identity-type="ALWAYS">
 		<type name="integer" length="0"/>
@@ -310,7 +310,7 @@ For Data Type, we choose VarThen because Variable-length with a maximum. Stores 
 <table name="instruments" layers="0" collapse-mode="2" max-obj-count="31" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="700" y="160"/>
+	<position x="618" y="151"/>
 	<column name="instrument_id" not-null="true"
 	 identity-type="ALWAYS">
 		<type name="integer" length="0"/>
@@ -454,6 +454,308 @@ For Data Type, we choose VarThen because Variable-length with a maximum. Stores 
 	 dst-table="public.instruments"
 	 src-required="false" dst-required="false"/>
 
+<table name="readings" layers="0" collapse-mode="2" max-obj-count="10" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="677.778" y="-471.111"/>
+	<column name="reading_id" not-null="true"
+	 identity-type="ALWAYS">
+		<type name="bigint" length="0"/>
+		<comment> <![CDATA[Primary key. Auto-incrementing bigint identifier due to the high volume of sensor readings over time]]> </comment>
+	</column>
+	<column name="reading_value" not-null="true">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[The measured value from the instrument in its configured engineering units]]> </comment>
+	</column>
+	<column name="reading_unit" not-null="true">
+		<type name="varchar" length="20"/>
+		<comment> <![CDATA[Engineering unit of the reading value (e.g., °C, MPa, %). Must match the instrument's configured range unit.]]> </comment>
+	</column>
+	<column name="reading_timestamp" not-null="true">
+		<type name="timestamptz" length="0"/>
+		<comment> <![CDATA[Exact time the reading was taken. Critical for time-series analysis, event correlation, and regulatory documentation.]]> </comment>
+	</column>
+	<column name="quality_flag" not-null="true" default-value="'GOOD'">
+		<type name="varchar" length="20"/>
+		<comment> <![CDATA[Data quality indicator for this reading (e.g., GOOD, SUSPECT, BAD, MANUALLY_ENTERED, SUBSTITUTED). Supports filtering of valid data for trending and analysis.]]> </comment>
+	</column>
+	<column name="is_anomaly" not-null="true" default-value="FALSE">
+		<type name="boolean" length="0"/>
+		<comment> <![CDATA[Whether this reading has been flagged as anomalous by automated detection algorithms such as SPRT or PCA-based methods.]]> </comment>
+	</column>
+	<column name="anomaly_score">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[Numerical score from the anomaly detection algorithm indicating the degree of deviation from expected behavior. Null when no anomaly analysis has been performed.]]> </comment>
+	</column>
+	<column name="created_at" not-null="true" default-value="CURRENT_TIMESTAMP">
+		<type name="timestamp" length="0"/>
+		<comment> <![CDATA[Timestamp of when this reading record was inserted into the database.]]> </comment>
+	</column>
+	<constraint name="readings_pk" type="pk-constr" table="public.readings">
+		<columns names="reading_id" ref-type="src-columns"/>
+	</constraint>
+
+	<customidxs object-type="column">
+		<object name="instrument_id_instruments" index="8"/>
+	</customidxs>
+	<customidxs object-type="constraint">
+		<object name="instruments_fk" index="1"/>
+	</customidxs></table>
+
+<relationship name="instruments_has_many_readings" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
+	 custom-color="#8351fb"
+	 src-table="public.instruments"
+	 dst-table="public.readings"
+	 src-required="false" dst-required="false"/>
+
+<table name="alerts" layers="0" collapse-mode="2" max-obj-count="16" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="1560" y="-284.444"/>
+	<column name="alert_id" not-null="true"
+	 identity-type="ALWAYS">
+		<type name="bigint" length="0"/>
+		<comment> <![CDATA[Primary key. Auto-incrementing bigint identifier for each alert event.]]> </comment>
+	</column>
+	<column name="alert_type" not-null="true">
+		<type name="varchar" length="30"/>
+		<comment> <![CDATA[Classification of the alert.]]> </comment>
+	</column>
+	<column name="alert_severity" not-null="true">
+		<type name="varchar" length="15"/>
+		<comment> <![CDATA[Severity level of the alert (e.g., INFO, WARNING, ALARM, CRITICAL). Drives dashboard prioitization and notification routing. ]]> </comment>
+	</column>
+	<column name="alert_message" not-null="true">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Human-readable description of the alert condition (e.g., 'RCS pressure exceeded high alarm setpoint of 15.9 MPa'). ]]> </comment>
+	</column>
+	<column name="trigger_value">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[The instrument reading value that triggered the alert. Null for non-measurement-based alerts like calibration reminders. ]]> </comment>
+	</column>
+	<column name="trigger_threshold">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[The setpoint or threshold value that was exceeded to trigger the alert. Provides context for evaluating the severity of the exceedance. ]]> </comment>
+	</column>
+	<column name="triggered_at" not-null="true">
+		<type name="timestamptz" length="0"/>
+		<comment> <![CDATA[Exact time the laert condition was detected. ]]> </comment>
+	</column>
+	<column name="acknowledged_at">
+		<type name="timestamptz" length="100"/>
+		<comment> <![CDATA[Time the alert was acknowledged by an operator or engineer. Null if not yet acknowledged. ]]> </comment>
+	</column>
+	<column name="acknowledged_by">
+		<type name="varchar" length="100"/>
+		<comment> <![CDATA[Name or user ID of the person who acknowledged the alert. Null if not yet acknowledged. ]]> </comment>
+	</column>
+	<column name="resolved_at">
+		<type name="timestamptz" length="0"/>
+		<comment> <![CDATA[Time the alert condition was resolved or cleared. Null if still active. ]]> </comment>
+	</column>
+	<column name="resolution_notes">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Description of the corrective actions taken to resolve the alert condition. Important for trend analysis and recurring issue identification. ]]> </comment>
+	</column>
+	<column name="is_active" not-null="true" default-value="TRUE">
+		<type name="boolean" length="0"/>
+		<comment> <![CDATA[Whether this alert is currently active. Set to false when resolved. Supports dashboard filtering for current alarm status. ]]> </comment>
+	</column>
+	<column name="created_at" not-null="true" default-value="CURRENT_TIMESTAMP">
+		<type name="timestamp" length="0"/>
+		<comment> <![CDATA[Timestamp of when this alert record was created in the database. ]]> </comment>
+	</column>
+	<constraint name="alerts_pk" type="pk-constr" table="public.alerts">
+		<columns names="alert_id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<relationship name="instruments_has_many_alerts" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
+	 custom-color="#4f253f"
+	 src-table="public.instruments"
+	 dst-table="public.alerts"
+	 src-required="false" dst-required="false"/>
+
+<table name="maintenance_events" layers="0" collapse-mode="2" max-obj-count="18" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="1597.78" y="1020"/>
+	<column name="event_id" not-null="true"
+	 identity-type="ALWAYS">
+		<type name="bigint" length="0"/>
+		<comment> <![CDATA[Primary key. Auto-incrementing bigint identifier for each maintenance event. ]]> </comment>
+	</column>
+	<column name="event_type" not-null="true">
+		<type name="varchar" length="30"/>
+		<comment> <![CDATA[Type of maintenance activity performed (e.g., CALIBRATION, REPAIR, REPLACEMENT, INSPECTION, PREVENTITIVE, CORRECTIVE, SURVEILLANCE).]]> </comment>
+	</column>
+	<column name="work_order_number">
+		<type name="varchar" length="30"/>
+		<comment> <![CDATA[Plant work order number associated with this maintenance activity. Links to the plant's work management system for full documentation. ]]> </comment>
+	</column>
+	<column name="description" not-null="true">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Detailed description of the maintenance activity performed, including scope of work, findings, and any as-left conditions. ]]> </comment>
+	</column>
+	<column name="performed_by">
+		<type name="varchar" length="100"/>
+		<comment> <![CDATA[Name or ID of the technician or engineer who performed the maintenance. Important for qualification tracking and accountability. ]]> </comment>
+	</column>
+	<column name="reviewed_by">
+		<type name="varchar" length="100"/>
+		<comment> <![CDATA[Name or ID of the person who reviewed and approved the completed maintencance work. Required for safety-related instrument maintenance per 10CFR50 Appendix B. ]]> </comment>
+	</column>
+	<column name="scheduled_date">
+		<type name="date" length="0"/>
+		<comment> <![CDATA[Planned date for the maintenance activity. Used for scheduling and workload planning. ]]> </comment>
+	</column>
+	<column name="started_at">
+		<type name="timestamptz" length="0"/>
+		<comment> <![CDATA[Actual date and time the maintenance work began. ]]> </comment>
+	</column>
+	<column name="completed_at">
+		<type name="timestamptz" length="0"/>
+		<comment> <![CDATA[Date and time the maintenance work was completed. Null if work is still in progress. ]]> </comment>
+	</column>
+	<column name="findings">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Observations and findings during the maintenance activity including any unexpected conditions, degradation, or anomalies discovered. ]]> </comment>
+	</column>
+	<column name="corrective_actions">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Actions taken to correct any issues found during maintenance. Includes parts replaced, adjustments made, and any follow-up actions required. ]]> </comment>
+	</column>
+	<column name="status" not-null="true" default-value="'SCHEDULED'">
+		<type name="varchar" length="20"/>
+		<comment> <![CDATA[Current status of the maintenance event (e.g., SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED, DEFERRED).]]> </comment>
+	</column>
+	<column name="created_at" not-null="true" default-value="CURRENT_TIMESTAMP">
+		<type name="timestamp" length="0"/>
+		<comment> <![CDATA[Timestamp of when this maintenance event record was created in the database. ]]> </comment>
+	</column>
+	<column name="updated_at" not-null="true" default-value="CURRENT_TIMESTAMP">
+		<type name="timestamp" length="0"/>
+		<comment> <![CDATA[Timestamp of the last update to this record. ]]> </comment>
+	</column>
+	<constraint name="maintenance_events_pk" type="pk-constr" table="public.maintenance_events">
+		<columns names="event_id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<relationship name="instruments_has_many_maintenance_events" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
+	 custom-color="#4d0e92"
+	 src-table="public.instruments"
+	 dst-table="public.maintenance_events"
+	 src-required="false" dst-required="false"/>
+
+<table name="calibration_records" layers="0" collapse-mode="2" max-obj-count="24" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="34.2857" y="1265.71"/>
+	<column name="calibration_id" not-null="true"
+	 identity-type="ALWAYS">
+		<type name="bigint" length="0"/>
+		<comment> <![CDATA[Primary key. Auto-incrementing bigint identifier for each calibration record. ]]> </comment>
+	</column>
+	<column name="calibration_type" not-null="true">
+		<type name="varchar" length="30"/>
+		<comment> <![CDATA[Type of calibration performed (eg., FULL, PARTIAL, CHANNEL_CHECK, FUNCTIONAL, TEST, CROSS_CALIBRATION). Determine the scope and rigor of the calibration data. ]]> </comment>
+	</column>
+	<column name="calibration_date" not-null="true">
+		<type name="date" length="0"/>
+		<comment> <![CDATA[Date the calibration was performed. Used to update the instrument's last_calibration_date and calculate the next due date. ]]> </comment>
+	</column>
+	<column name="calibration_due_date">
+		<type name="date" length="0"/>
+		<comment> <![CDATA[Date by which this calibration was required. Comparing with calibration_date shows whether calibration was performed on time, early, or late. ]]> </comment>
+	</column>
+	<column name="as_found_in_tolerance" not-null="true">
+		<type name="boolean" length="0"/>
+		<comment> <![CDATA[Whether the instrument was found within its required tolerance before any adjustments. A critical metric for drift analysis and instrument reliability assessment. ]]> </comment>
+	</column>
+	<column name="as_left_in_tolerance" not-null="true">
+		<type name="boolean" length="0"/>
+		<comment> <![CDATA[Whether the instrument was within required tolerance after calibration adjustments. Must be true for the instrument to be returned to service. ]]> </comment>
+	</column>
+	<column name="as_found_data">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Detailed as-found calibration data including test point values, measured outputs, and deviations from expected values. May be stored as structured text or JSON. ]]> </comment>
+	</column>
+	<column name="as_left_data">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Detailed as-left calibration data after adjustments. Same format as  as_found_data. Comparison between as-found and as-left quantifies the drift that occurred. ]]> </comment>
+	</column>
+	<column name="drift_value">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[Calculated drift since the previous calibration, typically expressed as the maximum deviation across all test points. The primary input for SPRT-based drift monitoring. ]]> </comment>
+	</column>
+	<column name="drift_unit">
+		<type name="varchar" length="20"/>
+		<comment> <![CDATA[Engineering unit or format of the drift value (e.g., °C, % of span). Must be consistent across calibration records for the same instrument to enable trend analysis. ]]> </comment>
+	</column>
+	<column name="tolerance_band">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[The allowable tolerance band used to evaluate as-found and as-left conditions. Typically expressed in the same units as drift_value or as percent of span. ]]> </comment>
+	</column>
+	<column name="reference_standard">
+		<type name="varchar" length="100"/>
+		<comment> <![CDATA[Identification of the reference standard or test equipment used for calibration. Must be traceable to NIST or equivalent national standards per 10CFR50 Appendix B. ]]> </comment>
+	</column>
+	<column name="reference_standard_due_date">
+		<type name="date" length="0"/>
+		<comment> <![CDATA[Calibration due date of the reference standard at time of use. Verifies the standard was in calibration when used, a key QA requirement. ]]> </comment>
+	</column>
+	<column name="performed_by">
+		<type name="varchar" length="100"/>
+		<comment> <![CDATA[Name or ID of the technician who performed the calibration. Required for qualification verification and accountability. ]]> </comment>
+	</column>
+	<column name="reviewed_by">
+		<type name="varchar" length="100"/>
+		<comment> <![CDATA[Name or ID of the person who reviewed and approved the calibration results. Required for safety-related calibrations per 10CFR50 Appendix B. ]]> </comment>
+	</column>
+	<column name="work_order_number">
+		<type name="varchar" length="30"/>
+		<comment> <![CDATA[Plant work order number associated with this calibration. Links to the plant's work management system and the corresponding maintenance_events record. ]]> </comment>
+	</column>
+	<column name="procedure_number">
+		<type name="varchar" length="30"/>
+		<comment> <![CDATA[Calibration procedure number used to perform the calibration. Required for repeatability and regulatory  compliance. ]]> </comment>
+	</column>
+	<column name="notes">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Additional observations, anomalies, or conditions noted during calibration. Includes any limitations, compensatory measures, or receommended follow-up actions. ]]> </comment>
+	</column>
+	<column name="created_at" not-null="true" default-value="CURRENT_TIMESTAMP">
+		<type name="timestamp" length="0"/>
+		<comment> <![CDATA[Timestamp of when this calibration record was created in the database. ]]> </comment>
+	</column>
+	<constraint name="calibration_records_pk" type="pk-constr" table="public.calibration_records">
+		<columns names="calibration_id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<relationship name="instruments_has_many_calibration_records" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
+	 custom-color="#cb2a85"
+	 src-table="public.instruments"
+	 dst-table="public.calibration_records"
+	 src-required="false" dst-required="false"/>
+
 <constraint name="fk_locations_parent" type="fk-constr" comparison-type="MATCH SIMPLE"
 	 upd-action="NO ACTION" del-action="SET NULL" ref-table="public.locations" table="public.locations">
 	<columns names="parent_location_id" ref-type="src-columns"/>
@@ -465,9 +767,9 @@ For Data Type, we choose VarThen because Variable-length with a maximum. Stores 
 	 dst-table="public.locations" reference-fk="fk_locations_parent"
 	 src-required="false" dst-required="false">
 	<line>
-		<position x="1346.07" y="617.775"/>
-	<position x="1346.07" y="507"/>
-	<position x="1195.38" y="507"/>
+		<position x="1400.29" y="1032.33"/>
+	<position x="1400.29" y="921.556"/>
+	<position x="1249.6" y="921.556"/>
 	</line>
 </relationship>
 
