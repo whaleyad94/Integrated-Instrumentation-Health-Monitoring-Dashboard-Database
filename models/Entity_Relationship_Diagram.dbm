@@ -3,9 +3,9 @@
 CAUTION: Do not modify this file unless you know what you are doing.
  Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="1.2.3" use-changelog="false" max-obj-count="4"
+<dbmodel pgmodeler-ver="1.2.3" use-changelog="false" max-obj-count="8"
 	 gen-disabled-objs-code="false" show-sys-schemas-rects="true"
-	 last-position="504,171" last-zoom="1"
+	 last-position="131,81" last-zoom="1" scene-rect="0,-20,1802.44,1172.72"
 	 default-schema="public" default-owner="postgres"
 	 layers="Default layer"
 	 active-layers="0"
@@ -115,7 +115,7 @@ For Data Type, we choose VarThen because Variable-length with a maximum. Stores 
 <table name="measurement_parameters" layers="0" collapse-mode="2" max-obj-count="6" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="820" y="40"/>
+	<position x="960" y="20"/>
 	<column name="parameter_id" not-null="true"
 	 identity-type="ALWAYS">
 		<type name="integer" length="0"/>
@@ -161,7 +161,7 @@ For Data Type, we choose VarThen because Variable-length with a maximum. Stores 
 <table name="plant_systems" layers="0" collapse-mode="2" max-obj-count="6" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="811" y="374"/>
+	<position x="340" y="560"/>
 	<column name="system_id" not-null="true"
 	 identity-type="ALWAYS">
 		<type name="integer" length="0"/>
@@ -197,7 +197,7 @@ For Data Type, we choose VarThen because Variable-length with a maximum. Stores 
 <table name="locations" layers="0" collapse-mode="2" max-obj-count="7" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="1220" y="380"/>
+	<position x="960" y="540"/>
 	<column name="location_id" not-null="true"
 	 identity-type="ALWAYS">
 		<type name="integer" length="0"/>
@@ -230,5 +230,245 @@ For Data Type, we choose VarThen because Variable-length with a maximum. Stores 
 		<columns names="location_code" ref-type="src-columns"/>
 	</constraint>
 </table>
+
+<table name="safety_classifications" layers="0" collapse-mode="2" max-obj-count="7" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="960" y="260"/>
+	<column name="classification_id" not-null="true"
+	 identity-type="ALWAYS">
+		<type name="integer" length="0"/>
+		<comment> <![CDATA[Primary key. Auto-incrementing integer identifier for each safety classification]]> </comment>
+	</column>
+	<column name="classification_code" not-null="true">
+		<type name="varchar" length="10"/>
+		<comment> <![CDATA[Short code for the safety classification (e.g., SR for Safety-Related, AQ for Augmented Quality, NSR for Non-Safety Related)]]> </comment>
+	</column>
+	<column name="classification_name" not-null="true">
+		<type name="varchar" length="50"/>
+		<comment> <![CDATA[Full name of the safety classification (e.g., Safety-Related, Augmented Quality, Non-Safety Related)]]> </comment>
+	</column>
+	<column name="regulatory_basis">
+		<type name="varchar" length="100"/>
+		<comment> <![CDATA[Regulatory requirement or standard that defines this classification (e.g., 10CFR50 Appendix B for Safety-Related).]]> </comment>
+	</column>
+	<column name="qa_requirements">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Description of quality assurance requirements applicable to instruments under this classification including documentation, testing, procurement, and maintenance standards.]]> </comment>
+	</column>
+	<column name="description">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[General description of the safety classification including its significance for plant safety and the consequences of instrument failure within this classification]]> </comment>
+	</column>
+	<constraint name="safety_classifications_pk" type="pk-constr" table="public.safety_classifications">
+		<columns names="classification_id" ref-type="src-columns"/>
+	</constraint>
+	<constraint name="uq_safety_classifications_classification_code" type="uq-constr" table="public.safety_classifications">
+		<columns names="classification_code" ref-type="src-columns"/>
+	</constraint>
+	<constraint name="uq_safety_classifications_classification_name" type="uq-constr" table="public.safety_classifications">
+		<columns names="classification_name" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="instrument_statuses" layers="0" collapse-mode="2" max-obj-count="6" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="340" y="820"/>
+	<column name="status_id" not-null="true"
+	 identity-type="ALWAYS">
+		<type name="integer" length="0"/>
+		<comment> <![CDATA[Primary key. Auto-incrementing integer identifier for each instrument status]]> </comment>
+	</column>
+	<column name="status_code" not-null="true">
+		<type name="varchar" length="10"/>
+		<comment> <![CDATA[Short code for the instrument status (e.g., ACT for Active, OOS for Out of Service, DEG for Degraded, FAIL for Failed)]]> </comment>
+	</column>
+	<column name="status_name" not-null="true">
+		<type name="varchar" length="30"/>
+		<comment> <![CDATA[Full name of the instrument status (e.g., Active, Out of Service, Degraded, Failed, Decommissioned)]]> </comment>
+	</column>
+	<column name="is_readings_valid" default-value="TRUE">
+		<type name="boolean" length="0"/>
+		<comment> <![CDATA[Whether readings from instruments in this status should be considered valid for monitoring and trending purposes.]]> </comment>
+	</column>
+	<column name="description">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Description of what this status means operationally, including any required compensatory actions or documentation when an instrument enters this status]]> </comment>
+	</column>
+	<constraint name="instrument_statuses_pk" type="pk-constr" table="public.instrument_statuses">
+		<columns names="status_id" ref-type="src-columns"/>
+	</constraint>
+	<constraint name="uq_instrument_statuses_status_code" type="uq-constr" table="public.instrument_statuses">
+		<columns names="status_code" ref-type="src-columns"/>
+	</constraint>
+	<constraint name="uq_instrument_statuses_status_name" type="uq-constr" table="public.instrument_statuses">
+		<columns names="status_name" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="instruments" layers="0" collapse-mode="2" max-obj-count="31" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="700" y="160"/>
+	<column name="instrument_id" not-null="true"
+	 identity-type="ALWAYS">
+		<type name="integer" length="0"/>
+		<comment> <![CDATA[Primary key. Auto-incrementing integer identifier for each individual instrument]]> </comment>
+	</column>
+	<column name="tag_number" not-null="true">
+		<type name="varchar" length="20"/>
+		<comment> <![CDATA[Plant instrument tag number per ISA-5.1 conventions (e.g., TE-0412A). The unique plant-wide identifier used on P&IDs, work orders, and Technical Specifications.]]> </comment>
+	</column>
+	<column name="manufacturer">
+		<type name="varchar" length="100"/>
+		<comment> <![CDATA[Instrument manufacturer. Important for tracking vendor-specific issues, 10CFR21 defect notifications, and procurement.]]> </comment>
+	</column>
+	<column name="model_number">
+		<type name="varchar" length="50"/>
+		<comment> <![CDATA[Manufacturer model number. Determines exact technical specifications, spare parts compatibility, and applicable maintenance procedures.]]> </comment>
+	</column>
+	<column name="serial_number">
+		<type name="varchar" length="50"/>
+		<comment> <![CDATA[Unique manufacturer serial number for this specific device. Required for traceability — every calibration record, maintenance action, and quality record references the serial number.]]> </comment>
+	</column>
+	<column name="range_min">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[Lower bound of this instrument's calibrated range. This is the actual configured range, not the general capability of the instrument type.]]> </comment>
+	</column>
+	<column name="range_max">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[Upper bound of this instrument's calibrated range. This is the actual configured range, not the general capability of the instrument type]]> </comment>
+	</column>
+	<column name="range_unit">
+		<type name="varchar" length="20"/>
+		<comment> <![CDATA[Engineering unit for this instrument's calibrated range (e.g., °C, MPa, % power).]]> </comment>
+	</column>
+	<column name="setpoint_high">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[High alarm or trip setpoint value. Null if this instrument does not drive alarms or trips]]> </comment>
+	</column>
+	<column name="setpoint_low">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[Low alarm or trip setpoint value. Null if this instrument does not drive alarms or trips.]]> </comment>
+	</column>
+	<column name="accuracy">
+		<type name="varchar" length="50"/>
+		<comment> <![CDATA[Actual accuracy specification for this specific instrument as installed and calibrated. May differ from the instrument type's typical accuracy due to range, environment, and age.]]> </comment>
+	</column>
+	<column name="loop_number">
+		<type name="varchar" length="20"/>
+		<comment> <![CDATA[Instrument loop this device belongs to. Multiple instruments often share a loop — a sensor, transmitter, indicator, and controller may all be part of the same loop]]> </comment>
+	</column>
+	<column name="redundancy_group">
+		<type name="varchar" length="20"/>
+		<comment> <![CDATA[Redundancy division or train this instrument belongs to (e.g., Division I, Train A, Channel III). Critical for Technical Specification operability and allowed outage time tracking]]> </comment>
+	</column>
+	<column name="tech_spec_reference">
+		<type name="varchar" length="50"/>
+		<comment> <![CDATA[Reference to the applicable Technical Specification section if any. Directly links the instrument to its regulatory surveillance and operability requirements]]> </comment>
+	</column>
+	<column name="installation_date">
+		<type name="date" length="0"/>
+		<comment> <![CDATA[Date the instrument was first installed in the plant.]]> </comment>
+	</column>
+	<column name="last_calibration_date">
+		<type name="integer" length="0"/>
+		<comment> <![CDATA[Required calibration frequency in months. Typically 18 or 24 months for safety-related instruments, aligned with refueling outages.]]> </comment>
+	</column>
+	<column name="is_tech_spec" not-null="true" default-value="FALSE">
+		<type name="boolean" length="0"/>
+		<comment> <![CDATA[Whether this instrument is referenced in the plant Technical Specifications. Tech Spec instruments have the most stringent surveillance requirements.]]> </comment>
+	</column>
+	<column name="is_eq_required" not-null="true" default-value="FALSE">
+		<type name="boolean" length="0"/>
+		<comment> <![CDATA[Whether this instrument must be environmentally qualified per 10CFR50.49 to function under design basis accident conditions.]]> </comment>
+	</column>
+	<column name="description">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Additional notes specific to this instrument including special installation conditions, known issues, or compensatory measures when out of service.]]> </comment>
+	</column>
+	<column name="created_at" not-null="true" default-value="CURRENT_TIMESTAMP">
+		<type name="timestamp" length="0"/>
+		<comment> <![CDATA[Timestamp of when this record was created in the database.]]> </comment>
+	</column>
+	<column name="updated_at" not-null="true" default-value="CURRENT_TIMESTAMP">
+		<type name="timestamp" length="0"/>
+		<comment> <![CDATA[Timestamp of the last update to this record. Should be updated automatically on any modification.]]> </comment>
+	</column>
+	<constraint name="instruments_pk" type="pk-constr" table="public.instruments">
+		<columns names="instrument_id" ref-type="src-columns"/>
+	</constraint>
+	<constraint name="uq_instruments_tag_number" type="uq-constr" table="public.instruments">
+		<columns names="tag_number" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<relationship name="instrument_types_has_many_instruments" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
+	 custom-color="#db1653"
+	 src-table="public.instrument_types"
+	 dst-table="public.instruments"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="plant_systems_has_many_instruments" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
+	 custom-color="#ee257c"
+	 src-table="public.plant_systems"
+	 dst-table="public.instruments"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="locations_has_many_instruments" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
+	 custom-color="#2786bb"
+	 src-table="public.locations"
+	 dst-table="public.instruments"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="safety_classifications_has_many_instruments" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
+	 custom-color="#d4e2ff"
+	 src-table="public.safety_classifications"
+	 dst-table="public.instruments"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="instrument_statuses_has_many_instruments" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
+	 custom-color="#0cca7f"
+	 src-table="public.instrument_statuses"
+	 dst-table="public.instruments"
+	 src-required="false" dst-required="false"/>
+
+<constraint name="fk_locations_parent" type="fk-constr" comparison-type="MATCH SIMPLE"
+	 upd-action="NO ACTION" del-action="SET NULL" ref-table="public.locations" table="public.locations">
+	<columns names="parent_location_id" ref-type="src-columns"/>
+	<columns names="location_id" ref-type="dst-columns"/>
+</constraint>
+
+<relationship name="rel_locations_locations" type="relfk" layers="0"
+	 src-table="public.locations"
+	 dst-table="public.locations" reference-fk="fk_locations_parent"
+	 src-required="false" dst-required="false">
+	<line>
+		<position x="1346.07" y="617.775"/>
+	<position x="1346.07" y="507"/>
+	<position x="1195.38" y="507"/>
+	</line>
+</relationship>
 
 </dbmodel>
