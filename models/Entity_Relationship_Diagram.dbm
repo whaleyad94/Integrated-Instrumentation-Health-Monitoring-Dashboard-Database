@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+CAUTION: Do not modify this file unless you know what you are doing.
+ Unexpected results may occur if the code is changed deliberately.
+-->
+<dbmodel pgmodeler-ver="1.2.3" use-changelog="false" max-obj-count="4"
+	 gen-disabled-objs-code="false" show-sys-schemas-rects="true"
+	 last-position="201,62" last-zoom="1"
+	 default-schema="public" default-owner="postgres"
+	 layers="Default layer"
+	 active-layers="0"
+	 layer-name-colors="#000000"
+	 layer-rect-colors="#b4b4b4"
+	 show-layer-names="false" show-layer-rects="false">
+<database name="new_database" is-template="false" allow-conns="true">
+</database>
+
+<schema name="public" layers="0" fill-color="#e1e1e1" name-color="#000000" sql-disabled="true">
+</schema>
+
+<schema name="instrumentation_health_monitoring" layers="0" rect-visible="true" fill-color="#e1e1e1" name-color="#31363b">
+	<role name="postgres"/>
+</schema>
+
+<table name="instrument_types" layers="0" collapse-mode="2" max-obj-count="2" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<comment> <![CDATA[Before we define the columns for the 'instruments' table, we need to clarify an important distinction. The instruments table holds individual physical devices — the specific RTD with serial number TE-0412A installed on Hot Leg Loop 1. What makes it comprehensive isn't the table structure itself, but the instrument types that populate it. The instrument types table is the catalog of all sensing technologies used in the plant, and every individual instrument references a type.]]> </comment>
+	<position x="541" y="326"/>
+	<column name="type_id" not-null="true"
+	 identity-type="ALWAYS">
+		<type name="integer" length="0"/>
+		<comment> <![CDATA[Primary key. An auto-incrementing integer. This is the internal database identifier that other tables reference. For data type, I choose integer because it is the standard choice for primary keys. It costs only 2 extra bytes per row and avoids any future limitations. For Default Value, I select the Identity radio button at the bottom (the third option). Make sure the dropdown next to it says ALWAYS. This is what makes it auto-incrementing.]]> </comment>
+	</column>
+	<column name="type_code" not-null="true">
+		<type name="varchar" length="0"/>
+		<comment> <![CDATA[ A short, standardized code for the instrument type. For example, "RTD" for Resistance Temperature Detectors, "CT" for Current Transformers, "SPND" for Self-Powered Neutron Detectors. This is what engineers would use in conversation and on documentation. Should be unique and constrained to a consistent format. 
+
+For Data Type, we choose VarThen because Variable-length with a maximum. Stores only the characters you actually provide, up to the limit. "RTD" stores as just "RTD" using only 3 characters. The length limit acts as a data integrity guard — it prevents someone from accidentally inserting a 500-character string into a field that should hold a short code. That's why it's appropriate for type_code — you know codes should be short, so capping it at 20 characters enforces that expectation at the database level. Then in the L (length) field next to it, we enter 20. This gives us up to 20 characters, which is plenty for short codes like "RTD", "SPND", "LPMS_ACCEL" while preventing someone from accidentally storing a full sentence in a code field.]]> </comment>
+	</column>
+	<constraint name="uq_instrument_types_type_code" type="uq-constr" table="public.instrument_types">
+		<columns names="type_code" ref-type="src-columns"/>
+		<comment> <![CDATA[We give this constraint a descriptive name like uq_instrument_types_type_code. The naming convention uq_tablename_columnname is a common professional practice that makes it immediately clear what the constraint does.]]> </comment>
+	</constraint>
+</table>
+
+</dbmodel>
