@@ -3,9 +3,9 @@
 CAUTION: Do not modify this file unless you know what you are doing.
  Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="1.2.3" use-changelog="false" max-obj-count="13"
+<dbmodel pgmodeler-ver="1.2.3" use-changelog="false" max-obj-count="24"
 	 gen-disabled-objs-code="false" show-sys-schemas-rects="true"
-	 last-position="0,-98" last-zoom="0.35" scene-rect="-157,-1096.8,2136.98,2677.64"
+	 last-position="-64,-331" last-zoom="0.35" scene-rect="-1733.66,-1096.8,5390.15,3960.44"
 	 default-schema="public" default-owner="postgres"
 	 layers="Default layer"
 	 active-layers="0"
@@ -274,7 +274,7 @@ For Data Type, we choose VarThen because Variable-length with a maximum. Stores 
 <table name="instrument_statuses" layers="0" collapse-mode="2" max-obj-count="6" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="299.921" y="950.952"/>
+	<position x="308.492" y="979.524"/>
 	<column name="status_id" not-null="true"
 	 identity-type="ALWAYS">
 		<type name="integer" length="0"/>
@@ -307,7 +307,7 @@ For Data Type, we choose VarThen because Variable-length with a maximum. Stores 
 	</constraint>
 </table>
 
-<table name="instruments" layers="0" collapse-mode="2" max-obj-count="31" z-value="0">
+<table name="instruments" layers="0" collapse-mode="2" max-obj-count="32" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
 	<position x="618" y="151"/>
@@ -373,6 +373,10 @@ For Data Type, we choose VarThen because Variable-length with a maximum. Stores 
 		<comment> <![CDATA[Date the instrument was first installed in the plant.]]> </comment>
 	</column>
 	<column name="last_calibration_date">
+		<type name="date" length="0"/>
+		<comment> <![CDATA[Date of the most recent calibration. Used with calibration_interval_months to calculate next due date and flag overdue instruments.]]> </comment>
+	</column>
+	<column name="calibration_interval_months">
 		<type name="integer" length="0"/>
 		<comment> <![CDATA[Required calibration frequency in months. Typically 18 or 24 months for safety-related instruments, aligned with refueling outages.]]> </comment>
 	</column>
@@ -457,7 +461,7 @@ For Data Type, we choose VarThen because Variable-length with a maximum. Stores 
 <table name="readings" layers="0" collapse-mode="2" max-obj-count="10" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="677.778" y="-471.111"/>
+	<position x="217.778" y="-422.54"/>
 	<column name="reading_id" not-null="true"
 	 identity-type="ALWAYS">
 		<type name="bigint" length="0"/>
@@ -515,7 +519,7 @@ For Data Type, we choose VarThen because Variable-length with a maximum. Stores 
 <table name="alerts" layers="0" collapse-mode="2" max-obj-count="16" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="1560" y="-284.444"/>
+	<position x="1254.29" y="-410.159"/>
 	<column name="alert_id" not-null="true"
 	 identity-type="ALWAYS">
 		<type name="bigint" length="0"/>
@@ -584,10 +588,10 @@ For Data Type, we choose VarThen because Variable-length with a maximum. Stores 
 	 dst-table="public.alerts"
 	 src-required="false" dst-required="false"/>
 
-<table name="maintenance_events" layers="0" collapse-mode="2" max-obj-count="18" z-value="0">
+<table name="maintenance_events" layers="0" collapse-mode="2" max-obj-count="19" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="1597.78" y="1020"/>
+	<position x="1617.78" y="1002.86"/>
 	<column name="event_id" not-null="true"
 	 identity-type="ALWAYS">
 		<type name="bigint" length="0"/>
@@ -660,10 +664,10 @@ For Data Type, we choose VarThen because Variable-length with a maximum. Stores 
 	 dst-table="public.maintenance_events"
 	 src-required="false" dst-required="false"/>
 
-<table name="calibration_records" layers="0" collapse-mode="2" max-obj-count="24" z-value="0">
+<table name="calibration_records" layers="0" collapse-mode="2" max-obj-count="25" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<position x="34.2857" y="1265.71"/>
+	<position x="-220" y="1022.86"/>
 	<column name="calibration_id" not-null="true"
 	 identity-type="ALWAYS">
 		<type name="bigint" length="0"/>
@@ -754,6 +758,630 @@ For Data Type, we choose VarThen because Variable-length with a maximum. Stores 
 	 custom-color="#cb2a85"
 	 src-table="public.instruments"
 	 dst-table="public.calibration_records"
+	 src-required="false" dst-required="false"/>
+
+<table name="technicians" layers="0" collapse-mode="2" max-obj-count="15" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="694.286" y="1600"/>
+	<column name="technician_id" not-null="true"
+	 identity-type="ALWAYS">
+		<type name="integer" length="0"/>
+		<comment> <![CDATA[Primary key. Auto-incrementing integer identifier for each technician.]]> </comment>
+	</column>
+	<column name="employee_id" not-null="true">
+		<type name="varchar" length="20"/>
+		<comment> <![CDATA[Plant-assigned employee identifier. The unique business key used in work orders, qualification records, and access control systems.]]> </comment>
+	</column>
+	<column name="first_name" not-null="true">
+		<type name="varchar" length="50"/>
+		<comment> <![CDATA[Technician's first name.]]> </comment>
+	</column>
+	<column name="last_name" not-null="true">
+		<type name="varchar" length="50"/>
+		<comment> <![CDATA[Technician's last name.]]> </comment>
+	</column>
+	<column name="job_title">
+		<type name="varchar" length="50"/>
+		<comment> <![CDATA[Current job title or role (e.g., I&C Technician, Senior I&C Technician, I&C Engineer, Reactor Engineer).]]> </comment>
+	</column>
+	<column name="department">
+		<type name="varchar" length="50"/>
+		<comment> <![CDATA[Department the technician belongs to (e.g., Instrumentation & Controls, Reactor Engineering, Maintenance).]]> </comment>
+	</column>
+	<column name="qualification_level">
+		<type name="varchar" length="30"/>
+		<comment> <![CDATA[Overall qualification level (e.g., APPRENTICE, QUALIFIED, SENIOR, SUPERVISOR, SPECIALIST). Determines which maintenance and calibration tasks the technician may perform.]]> </comment>
+	</column>
+	<column name="certification_expiry_date">
+		<type name="date" length="0"/>
+		<comment> <![CDATA[Date when the technician's current certification expires. Instruments calibrated by technicians with expired certifications may require recalibration per QA requirements.]]> </comment>
+	</column>
+	<column name="is_active" not-null="true" default-value="TRUE">
+		<type name="boolean" length="0"/>
+		<comment> <![CDATA[Whether the technician is currently active. Inactive technicians are retained for historical traceability of past maintenance and calibration records.]]> </comment>
+	</column>
+	<column name="email">
+		<type name="varchar" length="100"/>
+		<comment> <![CDATA[Technician's email address. Used for notification routing when alerts require response from qualified personnel.]]> </comment>
+	</column>
+	<column name="phone">
+		<type name="varchar" length="20"/>
+		<comment> <![CDATA[Technician's contact phone number.]]> </comment>
+	</column>
+	<column name="created_at" not-null="true" default-value="CURRENT_TIMESTAMP">
+		<type name="timestamp" length="0"/>
+		<comment> <![CDATA[Timestamp of when this technician record was created in the database.]]> </comment>
+	</column>
+	<column name="updated_at" not-null="true" default-value="CURRENT_TIMESTAMP">
+		<type name="timestamp" length="0"/>
+		<comment> <![CDATA[Timestamp of the last update to this record.]]> </comment>
+	</column>
+	<constraint name="technicians_pk" type="pk-constr" table="public.technicians">
+		<columns names="technician_id" ref-type="src-columns"/>
+	</constraint>
+	<constraint name="uq_technicians_employee_id" type="uq-constr" table="public.technicians">
+		<columns names="employee_id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<relationship name="technicians_has_many_calibration_records" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
+	 custom-color="#4e4cdd"
+	 src-table="public.technicians"
+	 dst-table="public.calibration_records"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="technicians_has_many_maintenance_events" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
+	 custom-color="#e8bf78"
+	 src-table="public.technicians"
+	 dst-table="public.maintenance_events"
+	 src-required="false" dst-required="false"/>
+
+<table name="drift_analyses" layers="0" collapse-mode="2" max-obj-count="22" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="748.571" y="-725.714"/>
+	<column name="analysis_id" not-null="true"
+	 identity-type="ALWAYS">
+		<type name="bigint" length="0"/>
+		<comment> <![CDATA[Primary key. Auto-incrementing bigint identifier for each drift analysis run.]]> </comment>
+	</column>
+	<column name="analysis_method" not-null="true">
+		<type name="varchar" length="30"/>
+		<comment> <![CDATA[Statistical method used for the drift analysis (e.g., SPRT, CUSUM, EWMA, SIMPLE_TREND, REGRESSION). Determines how the test statistic and decision should be interpreted.]]> </comment>
+	</column>
+	<column name="analysis_timestamp" not-null="true" default-value="CURRENT_TIMESTAMP">
+		<type name="timestamptz" length="0"/>
+		<comment> <![CDATA[Time the drift analysis was executed.]]> </comment>
+	</column>
+	<column name="calibration_intervals_included" not-null="true">
+		<type name="integer" length="0"/>
+		<comment> <![CDATA[Number of calibration intervals included in this analysis. More intervals provide stronger statistical evidence. Minimum of 2 required for meaningful analysis.]]> </comment>
+	</column>
+	<column name="first_calibration_id">
+		<type name="bigint" length="0"/>
+		<comment> <![CDATA[Reference to the earliest calibration record included in this analysis. Defines the start of the analysis window.]]> </comment>
+	</column>
+	<column name="last_calibration_id">
+		<type name="bigint" length="0"/>
+		<comment> <![CDATA[Reference to the most recent calibration record included in this analysis. Defines the end of the analysis window.]]> </comment>
+	</column>
+	<column name="test_statistic" not-null="true">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[The calculated test statistic from the analysis method. For SPRT, this is the log-likelihood ratio. For CUSUM, the cumulative sum. The value is compared against decision thresholds.]]> </comment>
+	</column>
+	<column name="upper_threshold">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[Upper decision threshold. For SPRT, this is ln(B) where B = (1-beta)/alpha. Exceeding this threshold indicates the drift hypothesis should be accepted."]]> </comment>
+	</column>
+	<column name="lower_threshold">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[Lower decision threshold. For SPRT, this is ln(A) where A = beta/(1-alpha). Falling below this threshold indicates the no-drift hypothesis should be accepted.]]> </comment>
+	</column>
+	<column name="decision" not-null="true">
+		<type name="varchar" length="20"/>
+		<comment> <![CDATA[Outcome of the drift analysis (ACCEPTABLE, EXCESSIVE_DRIFT, INCONCLUSIVE). ACCEPTABLE means drift is within allowable limits. EXCESSIVE_DRIFT triggers corrective action. INCONCLUSIVE means more data is needed.]]> </comment>
+	</column>
+	<column name="confidence_level">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[Statistical confidence level of the decision, expressed as a decimal (e.g., 0.95 for 95%). Derived from the alpha and beta error probabilities configured for the test.]]> </comment>
+	</column>
+	<column name="alpha_error">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[Type I error probability (false positive rate) used in the analysis. Probability of concluding excessive drift when drift is actually acceptable."]]> </comment>
+	</column>
+	<column name="beta_error">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[Type II error probability (false negative rate) used in the analysis. Probability of concluding acceptable drift when drift is actually excessive.]]> </comment>
+	</column>
+	<column name="mean_drift_rate">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[Estimated average drift rate per calibration interval. Positive values indicate upward drift, negative values indicate downward drift. Used for predicting future drift behavior.]]> </comment>
+	</column>
+	<column name="drift_rate_unit">
+		<type name="varchar" length="30"/>
+		<comment> <![CDATA[Unit of the mean drift rate (e.g., °C/interval, % of span/interval). Must be consistent across analyses for the same instrument."]]> </comment>
+	</column>
+	<column name="recommended_action">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Recommended action based on the analysis results (e.g., continue monitoring, reduce calibration interval, schedule calibration, investigate root cause). May be auto-generated or manually entered."]]> </comment>
+	</column>
+	<column name="notes">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Additional observations or context for the analysis including any data exclusions, anomalies in the calibration history, or engineering judgment applied to the results.]]> </comment>
+	</column>
+	<column name="created_at" not-null="true" default-value="CURRENT_TIMESTAMP">
+		<type name="timestamp" length="0"/>
+		<comment> <![CDATA[Timestamp of when this analysis record was created in the database.]]> </comment>
+	</column>
+	<constraint name="drift_analyses_pk" type="pk-constr" table="public.drift_analyses">
+		<columns names="analysis_id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<relationship name="instruments_has_many_drift_analyses" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
+	 custom-color="#0f9d42"
+	 src-table="public.instruments"
+	 dst-table="public.drift_analyses"
+	 src-required="false" dst-required="false"/>
+
+<table name="pca_analyses" layers="0" collapse-mode="2" max-obj-count="26" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="1694.29" y="48.5714"/>
+	<column name="analysis_id" not-null="true"
+	 identity-type="ALWAYS">
+		<type name="bigint" length="0"/>
+		<comment> <![CDATA[Primary key. Auto-incrementing bigint identifier for each PCA analysis run.]]> </comment>
+	</column>
+	<column name="analysis_timestamp" not-null="true" default-value="CURRENT_TIMESTAMP">
+		<type name="timestamptz" length="0"/>
+		<comment> <![CDATA[Time the PCA analysis was executed.]]> </comment>
+	</column>
+	<column name="sensor_group_name" not-null="true">
+		<type name="varchar" length="48"/>
+		<comment> <![CDATA[Name identifying the group of physically correlated sensors analyzed together (e.g., RCS_TEMPERATURE, SG_LEVEL). Sensors are grouped based on known physical relationships.]]> </comment>
+	</column>
+	<column name="sensor_group_description">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Description of the physical basis for this sensor grouping, including the expected correlations and the thermodynamic or process relationships that link the sensors.]]> </comment>
+	</column>
+	<column name="window_start" not-null="true">
+		<type name="timestamptz" length="0"/>
+		<comment> <![CDATA[Start of the time window of readings used in this analysis. Defines the data scope evaluated.]]> </comment>
+	</column>
+	<column name="window_end" not-null="true">
+		<type name="timestamptz" length="0"/>
+		<comment> <![CDATA[End of the time window of readings used in this analysis.]]> </comment>
+	</column>
+	<column name="num_sensors" not-null="true">
+		<type name="integer" length="0"/>
+		<comment> <![CDATA[Number of sensors included in the analysis group. Determines the dimensionality of the PCA model.]]> </comment>
+	</column>
+	<column name="num_components_retained" not-null="true">
+		<type name="integer" length="0"/>
+		<comment> <![CDATA[Number of principal components retained in the model. Selected to capture sufficient variance while separating signal from noise.]]> </comment>
+	</column>
+	<column name="variance_explained_ratio">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[Cumulative proportion of total variance explained by the retained components, expressed as a decimal (e.g., 0.95 for 95%). Indicates how well the reduced model represents the original sensor relationships."]]> </comment>
+	</column>
+	<column name="t_squared_threshold">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[Hotelling's T-squared control limit for the retained principal component space. Exceedances indicate abnormal variation in the modeled sensor relationships."]]> </comment>
+	</column>
+	<column name="q_residual_threshold">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[Q-statistic (squared prediction error) control limit for the residual space. Exceedances indicate a sensor has broken from its expected correlation with other sensors in the group.]]> </comment>
+	</column>
+	<column name="t_squared_value">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[Calculated Hotelling's T-squared value for the current analysis window. Compared against t_squared_threshold to detect abnormal variation.]]> </comment>
+	</column>
+	<column name="q_residual_value">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[Calculated Q-statistic for the current analysis window. Compared against q_residual_threshold to detect sensor decorrelation.]]> </comment>
+	</column>
+	<column name="fault_detected" not-null="true" default-value="FALSE">
+		<type name="boolean" length="0"/>
+		<comment> <![CDATA[Whether the analysis detected a fault condition — either a T-squared or Q-residual threshold exceedance indicating abnormal sensor behavior.]]> </comment>
+	</column>
+	<column name="fault_type">
+		<type name="varchar" length="30"/>
+		<comment> <![CDATA[Classification of the detected fault (e.g., SENSOR_DRIFT, SENSOR_FAILURE, PROCESS_CHANGE, COMMON_CAUSE). Null when no fault detected. Determined by contribution analysis of the principal components."]]> </comment>
+	</column>
+	<column name="faulted_sensor_tag">
+		<type name="varchar" length="20"/>
+		<comment> <![CDATA[Tag number of the sensor identified as the source of the fault through contribution analysis. Null if no fault detected or if the fault cannot be isolated to a single sensor.]]> </comment>
+	</column>
+	<column name="contribution_data">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Detailed contribution analysis results showing each sensor's contribution to the T-squared and Q-residual statistics. Used for fault isolation and diagnosis. Stored as structured text or JSON.]]> </comment>
+	</column>
+	<column name="model_parameters">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Serialized PCA model parameters including loading matrix, mean vector, and scaling factors. Enables model reconstruction and comparison across analysis runs.]]> </comment>
+	</column>
+	<column name="decision" not-null="true">
+		<type name="varchar" length="20"/>
+		<comment> <![CDATA[Overall outcome of the analysis (NORMAL, INVESTIGATE, SENSOR_FAULT, PROCESS_ANOMALY). Drives dashboard status indicators and alert generation.\]]> </comment>
+	</column>
+	<column name="recommended_action">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Recommended action based on the analysis results (e.g., continue monitoring, cross-check with independent measurement, schedule calibration verification, investigate process conditions)."]]> </comment>
+	</column>
+	<column name="notes">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Additional observations or engineering context for the analysis including any known process transients, maintenance activities, or other factors that may affect interpretation.]]> </comment>
+	</column>
+	<column name="created_at" not-null="true" default-value="CURRENT_TIMESTAMP">
+		<type name="timestamp" length="0"/>
+		<comment> <![CDATA[Timestamp of when this analysis record was created in the database.]]> </comment>
+	</column>
+	<constraint name="pca_analyses_pk" type="pk-constr" table="public.pca_analyses">
+		<columns names="analysis_id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="calibration_test_points" layers="0" collapse-mode="2" max-obj-count="21" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="-700" y="1400"/>
+	<column name="test_point_id" not-null="true"
+	 identity-type="ALWAYS">
+		<type name="bigint" length="0"/>
+		<comment> <![CDATA[Primary key. Auto-incrementing bigint identifier for each calibration test point.]]> </comment>
+	</column>
+	<column name="test_point_number" not-null="true">
+		<type name="integer" length="0"/>
+		<comment> <![CDATA[Sequential number of this test point within the calibration (e.g., 1, 2, 3, 4, 5). Calibrations typically test 3-5 points across the instrument's range.]]> </comment>
+	</column>
+	<column name="nominal_input" not-null="true">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[The target input value applied to the instrument at this test point from the reference standard (e.g., 100°C, 10 MPa).]]> </comment>
+	</column>
+	<column name="nominal_input_unit" not-null="true">
+		<type name="varchar" length="20"/>
+		<comment> <![CDATA[Engineering unit of the nominal input value (e.g., °C, MPa, mA).]]> </comment>
+	</column>
+	<column name="expected_output" not-null="true">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[The theoretical output the instrument should produce for the given nominal input, calculated from the instrument's calibrated transfer function.]]> </comment>
+	</column>
+	<column name="expected_output_unit" not-null="true">
+		<type name="varchar" length="20"/>
+		<comment> <![CDATA[Engineering unit of the expected output value (e.g., mA, VDC, ohms).]]> </comment>
+	</column>
+	<column name="as_found_output" not-null="true">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[Actual output measured at this test point before any calibration adjustments. The difference between this and expected_output is the as-found error at this point.]]> </comment>
+	</column>
+	<column name="as_found_error">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[Calculated difference between as_found_output and expected_output. Positive values indicate the instrument reads high, negative values indicate it reads low.]]> </comment>
+	</column>
+	<column name="as_found_error_pct_span">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[As-found error expressed as a percentage of the instrument's calibrated span. Normalizes errors across different test points and instruments for comparison and trending.]]> </comment>
+	</column>
+	<column name="as_left_output">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[Actual output measured at this test point after calibration adjustments. Null if no adjustment was necessary because the as-found reading was within tolerance.]]> </comment>
+	</column>
+	<column name="as_left_error">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[Calculated difference between as_left_output and expected_output after adjustments. Should be smaller than as_found_error if adjustments were effective.]]> </comment>
+	</column>
+	<column name="as_left_error_pct_span">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[As-left error expressed as a percentage of the instrument's calibrated span. Must be within the instrument's tolerance band for the calibration to be acceptable.]]> </comment>
+	</column>
+	<column name="tolerance_limit">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[Allowable error limit at this test point, typically expressed in the same units as the error values. The as-left error must fall within this limit for the test point to pass.]]> </comment>
+	</column>
+	<column name="as_found_in_tolerance" not-null="true">
+		<type name="boolean" length="0"/>
+		<comment> <![CDATA[Whether the as-found error at this test point was within the tolerance limit. Used to determine pass/fail at the individual test point level.]]> </comment>
+	</column>
+	<column name="as_left_in_tolerance">
+		<type name="boolean" length="0"/>
+		<comment> <![CDATA[Whether the as-left error at this test point was within the tolerance limit after adjustment. Must be true for the instrument to be returned to service.]]> </comment>
+	</column>
+	<column name="direction">
+		<type name="varchar" length="10"/>
+		<comment> <![CDATA[Whether this test point was measured during an upscale (UP) or downscale (DOWN) traverse. Some instruments exhibit hysteresis.]]> </comment>
+	</column>
+	<column name="notes">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Additional observations at this test point including any anomalies, instability, or difficulty achieving a stable reading.]]> </comment>
+	</column>
+	<constraint name="calibration_test_points_pk" type="pk-constr" table="public.calibration_test_points">
+		<columns names="test_point_id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<relationship name="calibration_records_has_many_calibration_test_points" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
+	 custom-color="#a85d32"
+	 src-table="public.calibration_records"
+	 dst-table="public.calibration_test_points"
+	 src-required="false" dst-required="false"/>
+
+<table name="audit_log" layers="0" collapse-mode="2" max-obj-count="10" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="2200" y="600"/>
+	<column name="log_id" not-null="true"
+	 identity-type="ALWAYS">
+		<type name="bigint" length="0"/>
+		<comment> <![CDATA[Primary key. Auto-incrementing bigint identifier for each audit log entry.]]> </comment>
+	</column>
+	<column name="table_name" not-null="true">
+		<type name="varchar" length="50"/>
+		<comment> <![CDATA[Name of the database table where the change occurred (e.g., instruments, calibration_records, maintenance_events).]]> </comment>
+	</column>
+	<column name="record_id" not-null="true">
+		<type name="bigint" length="0"/>
+		<comment> <![CDATA[Primary key value of the record that was modified. Combined with table_name, uniquely identifies the affected record.]]> </comment>
+	</column>
+	<column name="action" not-null="true">
+		<type name="varchar" length="10"/>
+		<comment> <![CDATA[Type of modification performed (INSERT, UPDATE, DELETE). Required for 10CFR50 Appendix B traceability of changes to quality records.]]> </comment>
+	</column>
+	<column name="changed_fields">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[JSON representation of the fields that were changed, including field names, old values, and new values. Provides complete change traceability.]]> </comment>
+	</column>
+	<column name="changed_by" not-null="true">
+		<type name="varchar" length="100"/>
+		<comment> <![CDATA[Username or identifier of the person or system process that made the change.]]> </comment>
+	</column>
+	<column name="changed_at" not-null="true" default-value="CURRENT_TIMESTAMP">
+		<type name="timestamptz" length="0"/>
+		<comment> <![CDATA[Exact timestamp when the change was made. Provides chronological ordering of all modifications.]]> </comment>
+	</column>
+	<column name="reason">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Justification or reason for the change. Important for regulatory audits where modifications to safety-related instrument records must be justified.]]> </comment>
+	</column>
+	<column name="ip_address">
+		<type name="varchar" length="45"/>
+		<comment> <![CDATA[IP address from which the change was made. Supports security auditing and access tracking. Accommodates both IPv4 and IPv6 addresses.]]> </comment>
+	</column>
+	<constraint name="audit_log_pk" type="pk-constr" table="public.audit_log">
+		<columns names="log_id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="documents" layers="0" collapse-mode="2" max-obj-count="13" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="2200" y="1200"/>
+	<column name="document_id" not-null="true"
+	 identity-type="ALWAYS">
+		<type name="integer" length="0"/>
+		<comment> <![CDATA[Primary key. Auto-incrementing integer identifier for each document.]]> </comment>
+	</column>
+	<column name="document_number" not-null="true">
+		<type name="varchar" length="50"/>
+		<comment> <![CDATA[Plant document control number (e.g., ICP-4012 for a calibration procedure, VM-3201 for a vendor manual). The unique business identifier used in the document control system.]]> </comment>
+	</column>
+	<column name="document_title" not-null="true">
+		<type name="varchar" length="200"/>
+		<comment> <![CDATA[Full title of the document (e.g., 'Calibration Procedure for Rosemount 1153 Series D Pressure Transmitters').]]> </comment>
+	</column>
+	<column name="document_type" not-null="true">
+		<type name="varchar" length="30"/>
+		<comment> <![CDATA[Classification of the document (e.g., CALIBRATION_PROCEDURE, VENDOR_MANUAL, ENGINEERING_CALCULATION, MODIFICATION_PACKAGE, REGULATORY_CORRESPONDENCE, DRAWING).]]> </comment>
+	</column>
+	<column name="revision" not-null="true">
+		<type name="varchar" length="10"/>
+		<comment> <![CDATA[Current revision number or letter of the document (e.g., 'Rev. 5', 'R', '003'). Ensures the correct version is referenced for each instrument.]]> </comment>
+	</column>
+	<column name="revision_date">
+		<type name="date" length="0"/>
+		<comment> <![CDATA[Date of the current revision. Used to verify that the most current version is being used for maintenance and calibration activities.]]> </comment>
+	</column>
+	<column name="file_path">
+		<type name="varchar" length="500"/>
+		<comment> <![CDATA[Path or URL to the electronic copy of the document in the plant's document management system or file storage.]]> </comment>
+	</column>
+	<column name="is_active" not-null="true" default-value="TRUE">
+		<type name="boolean" length="0"/>
+		<comment> <![CDATA[Whether this document is currently active and in use. Superseded or cancelled documents are retained for historical reference but flagged as inactive.]]> </comment>
+	</column>
+	<column name="description">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Summary of the document's content and scope. Helps users determine relevance without opening the full document.]]> </comment>
+	</column>
+	<column name="created_at" not-null="true" default-value="CURRENT_TIMESTAMP">
+		<type name="timestamp" length="0"/>
+		<comment> <![CDATA[Timestamp of when this document record was created in the database.]]> </comment>
+	</column>
+	<column name="updated_at" not-null="true" default-value="CURRENT_TIMESTAMP">
+		<type name="timestamp" length="0"/>
+		<comment> <![CDATA[Timestamp of the last update to this record.]]> </comment>
+	</column>
+	<constraint name="documents_pk" type="pk-constr" table="public.documents">
+		<columns names="document_id" ref-type="src-columns"/>
+	</constraint>
+	<constraint name="uq_documents_document_number" type="uq-constr" table="public.documents">
+		<columns names="document_number" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="instrument_documents" layers="0" collapse-mode="2" max-obj-count="6" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="1800" y="1500"/>
+	<column name="instrument_document_id" not-null="true"
+	 identity-type="ALWAYS">
+		<type name="integer" length="0"/>
+		<comment> <![CDATA[Primary key. Auto-incrementing integer identifier for each instrument-document association.]]> </comment>
+	</column>
+	<column name="relationship_type" not-null="true">
+		<type name="varchar" length="30"/>
+		<comment> <![CDATA[Nature of the relationship between the instrument and document (e.g., CALIBRATION_PROCEDURE, VENDOR_MANUAL, ENGINEERING_CALCULATION, INSTALLATION_DRAWING, SETPOINT_DOCUMENT).]]> </comment>
+	</column>
+	<column name="notes">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Additional context about why this document is associated with this instrument, such as specific sections or applicability conditions.]]> </comment>
+	</column>
+	<constraint name="instrument_documents_pk" type="pk-constr" table="public.instrument_documents">
+		<columns names="instrument_document_id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<relationship name="instruments_has_many_instrument_documents" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
+	 custom-color="#c47d2e"
+	 src-table="public.instruments"
+	 dst-table="public.instrument_documents"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="documents_has_many_instrument_documents" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
+	 custom-color="#7a3db8"
+	 src-table="public.documents"
+	 dst-table="public.instrument_documents"
+	 src-required="false" dst-required="false"/>
+
+<table name="notifications" layers="0" collapse-mode="2" max-obj-count="13" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="1900" y="-400"/>
+	<column name="notification_id" not-null="true"
+	 identity-type="ALWAYS">
+		<type name="bigint" length="0"/>
+		<comment> <![CDATA[Primary key. Auto-incrementing bigint identifier for each notification.]]> </comment>
+	</column>
+	<column name="notification_channel" not-null="true">
+		<type name="varchar" length="20"/>
+		<comment> <![CDATA[Delivery method for the notification (e.g., EMAIL, DASHBOARD, SMS, PAGER). Determines how the notification is routed to the recipient.]]> </comment>
+	</column>
+	<column name="subject" not-null="true">
+		<type name="varchar" length="200"/>
+		<comment> <![CDATA[Subject line or title of the notification. Provides a concise summary for quick triage.]]> </comment>
+	</column>
+	<column name="message" not-null="true">
+		<type name="text" length="0"/>
+		<comment> <![CDATA[Full notification message body including alert details, instrument identification, recommended actions, and any relevant context.]]> </comment>
+	</column>
+	<column name="sent_at" not-null="true" default-value="CURRENT_TIMESTAMP">
+		<type name="timestamptz" length="0"/>
+		<comment> <![CDATA[Timestamp when the notification was sent or queued for delivery.]]> </comment>
+	</column>
+	<column name="read_at">
+		<type name="timestamptz" length="0"/>
+		<comment> <![CDATA[Timestamp when the recipient read or opened the notification. Null if not yet read. Supports response time tracking.]]> </comment>
+	</column>
+	<column name="is_read" not-null="true" default-value="FALSE">
+		<type name="boolean" length="0"/>
+		<comment> <![CDATA[Whether the notification has been read by the recipient. Supports dashboard filtering for unread notifications.]]> </comment>
+	</column>
+	<column name="delivery_status" not-null="true" default-value="'PENDING'">
+		<type name="varchar" length="20"/>
+		<comment> <![CDATA[Current delivery status of the notification (e.g., PENDING, SENT, DELIVERED, FAILED, BOUNCED). Supports retry logic and delivery confirmation.]]> </comment>
+	</column>
+	<column name="created_at" not-null="true" default-value="CURRENT_TIMESTAMP">
+		<type name="timestamp" length="0"/>
+		<comment> <![CDATA[Timestamp of when this notification record was created in the database.]]> </comment>
+	</column>
+	<constraint name="notifications_pk" type="pk-constr" table="public.notifications">
+		<columns names="notification_id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<relationship name="alerts_has_many_notifications" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
+	 custom-color="#d94f30"
+	 src-table="public.alerts"
+	 dst-table="public.notifications"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="technicians_has_many_notifications" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
+	 custom-color="#2db87a"
+	 src-table="public.technicians"
+	 dst-table="public.notifications"
+	 src-required="false" dst-required="false"/>
+
+<table name="pca_analysis_sensors" layers="0" collapse-mode="2" max-obj-count="8" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="2200" y="0"/>
+	<column name="pca_sensor_id" not-null="true"
+	 identity-type="ALWAYS">
+		<type name="integer" length="0"/>
+		<comment> <![CDATA[Primary key. Auto-incrementing integer identifier for each PCA analysis-sensor association.]]> </comment>
+	</column>
+	<column name="sensor_index" not-null="true">
+		<type name="integer" length="0"/>
+		<comment> <![CDATA[Position of this sensor in the PCA model's feature vector (0-indexed). Determines which column in the loading matrix corresponds to this sensor.]]> </comment>
+	</column>
+	<column name="contribution_to_t_squared">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[This sensor's contribution to the T-squared statistic in this analysis. Higher values indicate greater influence on the detected variation. Used for fault isolation.]]> </comment>
+	</column>
+	<column name="contribution_to_q_residual">
+		<type name="numeric" length="0"/>
+		<comment> <![CDATA[This sensor's contribution to the Q-residual statistic in this analysis. A high Q contribution indicates this sensor has broken from its expected correlation with the group.]]> </comment>
+	</column>
+	<column name="is_faulted" not-null="true" default-value="FALSE">
+		<type name="boolean" length="0"/>
+		<comment> <![CDATA[Whether this specific sensor was identified as the source of a fault in this analysis. Only one sensor per analysis is typically flagged unless a common-cause event is detected.]]> </comment>
+	</column>
+	<constraint name="pca_analysis_sensors_pk" type="pk-constr" table="public.pca_analysis_sensors">
+		<columns names="pca_sensor_id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<relationship name="pca_analyses_has_many_pca_analysis_sensors" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
+	 custom-color="#6b8e23"
+	 src-table="public.pca_analyses"
+	 dst-table="public.pca_analysis_sensors"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="instruments_has_many_pca_analysis_sensors" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 fk-idx-pattern="{st}_idx"
+	 custom-color="#b22222"
+	 src-table="public.instruments"
+	 dst-table="public.pca_analysis_sensors"
 	 src-required="false" dst-required="false"/>
 
 <constraint name="fk_locations_parent" type="fk-constr" comparison-type="MATCH SIMPLE"
